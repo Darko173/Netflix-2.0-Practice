@@ -2,9 +2,37 @@ import React, { useState } from 'react'
 import styled from "styled-components"
 import BackgroundImage from '../components/BackgroundImage';
 import Header from '../components/Header';
+import { createUserWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
+import { firebaseAuth } from '../utils/firebase-config';
+import { useNavigate } from 'react-router-dom';
 export default function Signup() {
+  const navigate= useNavigate();
     const [showPassword, setShowPassword]= useState(false);
-   
+    
+    const [formValues, setFormValues]= useState({
+      email: "",
+      password: "",
+    })
+
+
+    const handleSignin= async()=>{
+
+      try{
+
+        const {email, password}= formValues;
+        await createUserWithEmailAndPassword(firebaseAuth, email, password);
+
+      }
+      catch(err){
+        console.log(err);
+      }
+
+      onAuthStateChanged(firebaseAuth, (currentUser)=>{
+        if(currentUser) navigate("/");
+
+      }
+
+    )}   
   return (
     <Container showPassword={showPassword}> 
       
@@ -23,9 +51,15 @@ export default function Signup() {
           </h6>
           </div>
             <div className="form">
-            <input type='email' placeholder ="Email Address" name= "Email"/>
+            <input type='email' placeholder ="Email Address" name= "email" value ={formValues.email} onChange={(e) =>
+              setFormValues({
+                ...formValues,
+                [e.target.name]: e.target.value})}/>
             {
-              showPassword && <input type='password' placeholder ="Password" name= "Password"/>
+              showPassword && <input type='password' placeholder ="Password" name= "password" value ={formValues.password} onChange={(e) =>
+                setFormValues({
+                  ...formValues,
+                  [e.target.name]: e.target.value})} />
             }
             
             {
@@ -34,7 +68,7 @@ export default function Signup() {
             
             
           </div>
-        <button>Log In</button>
+        <button onClick={handleSignin}>Sign Up</button>
         </div>
       </div>
       
