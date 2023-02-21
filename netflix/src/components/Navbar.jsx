@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styled from "styled-components";
 import logo from "../assets/logo.png"
 import { FaPowerOff, FaSearch } from "react-icons/fa"
-import { signOut } from 'firebase/auth';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { firebaseAuth } from '../utils/firebase-config';
-export default function Navbar() {
+export default function Navbar({isScrolled}) {
 
     const links= [
         {name:"Home", link: "/"}, 
@@ -16,8 +16,14 @@ export default function Navbar() {
     const [showSearch, setShowSearch]= useState(false);
     const [inputHover, setInputHover]= useState(false);
 
+   const navigate= useNavigate(); 
+
+    onAuthStateChanged (firebaseAuth, (currentUser) => {
+       if (!currentUser) navigate("/login");
+    });
+
   return <Container>
-<nav className={'flex ${isScrolled ? "scrolled": ""}'}> 
+<nav className={ `flex ${isScrolled ? "scrolled": ""}`}> 
     <div className="left flex a-center">
         <div className="brand flex a-center j-center">
             <img src={logo} alt="logo"/>
@@ -33,13 +39,13 @@ export default function Navbar() {
         </ul>
     </div>
     <div className="right flex a-center">
-        <div className={'search ${showSearch ? "show-search" : ""}'}>
+        <div className={`search ${showSearch ? "show-search" : ""}`}>
             <button onFocus={()=>setShowSearch(true)} onBlur={
                 ()=>{
                     if(!inputHover) setShowSearch(false);
                 }
             }>
-                <FaSearch/>
+                <FaSearch/> 
             </button>
             <input type="text" placeholder='Search'
             onMouseEnter={()=>setInputHover(true)}
